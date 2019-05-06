@@ -1378,11 +1378,14 @@ class S3(object):
             info("Sending file '%s', please wait..." % filename)
         timestamp_start = time.time()
 
-        if buffer:
-            sha256_hash = checksum_sha256_buffer(buffer, offset, size_total)
+        if self.config.signature_v2:
+            request.body = ""
         else:
-            sha256_hash = checksum_sha256_file(filename, offset, size_total)
-        request.body = sha256_hash
+            if buffer:
+                sha256_hash = checksum_sha256_buffer(buffer, offset, size_total)
+            else:
+                sha256_hash = checksum_sha256_file(filename, offset, size_total)
+            request.body = sha256_hash
 
         if use_expect_continue:
             if not size_total:
